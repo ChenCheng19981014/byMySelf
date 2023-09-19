@@ -1,17 +1,32 @@
 <template>
-  <div class="byMySelf">byMySelf</div>
+  <div class="byMySelf">
+    <button
+      v-for="(i, index) in sceneList"
+      @click="changeScene(i)"
+      :key="index + 'btn'"
+    >
+      {{ i }}
+    </button>
+  </div>
 </template>
 
 <script>
+import bus from "./../../utils/Bus";
 export default {
   name: "byMySelf",
   components: {},
   data() {
-    return {};
+    return {
+      sceneList: ["scene1", "scene2"],
+    };
   },
   mounted() {},
-  methods: {},
-
+  methods: {
+    // 切场景
+    changeScene(name) {
+      bus.$emit("change-scene", name);
+    },
+  },
   watch: {},
   activated() {},
   // 场景自带销毁
