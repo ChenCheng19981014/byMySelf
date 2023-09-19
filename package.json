@@ -11,7 +11,12 @@
   },
   "dependencies": {
     "gh-pages": "^6.0.0",
-    "vue": "^3.3.4"
+    "less": "^4.2.0",
+    "path": "^0.12.7",
+    "run-scene-v2": "0.1.0",
+    "three": "^0.156.1",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
