@@ -56,6 +56,7 @@ export default {
         },
       }).load({
         path: "./s2.lt",
+        // path: "http://192.168.3.8:8080/file?path=project/linkpoint/&key=202309201504047125091001202347",
         dom: this.$refs["scene2"],
       });
 

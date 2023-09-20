@@ -78,7 +78,6 @@ const fn = (runScene, inputData = {}, constant = {}) => {
           this.triggerClick.bind(this)
         );
 
-        this.refreshDom()
 
         bus.$on('sceneRunning2', (isRunnig) => {
           this.isRunning = isRunnig

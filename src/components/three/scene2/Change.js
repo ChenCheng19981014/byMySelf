@@ -21,8 +21,6 @@ const fn = (runScene, inputData = {}, constant = {}) => {
 
     const { } = constant;
 
-
-
     // 场景初始化
     class InitScene {
       name = "initScene";
@@ -32,30 +30,28 @@ const fn = (runScene, inputData = {}, constant = {}) => {
         // 获取模型
         Utils.getMacro(() => this.getModel(), 1000);
         // 地球转动
-        this.earthRotation()
+        this.earthRotation();
       }
 
       getModel() {
-        this.earth = getModel('earth')
-        this.m78 = getModel('Extract7Group36186_0')
+        this.earth = getModel("earth");
+        this.m78 = getModel("Extract7Group36186_0");
       }
 
       earthRotation() {
-        runScene.cb.render.add('render', () => {
-          if (!this.earth || !this.m78) return
-          this.earth.rotation.y = this.earth.rotation.y + 0.001
-          this.m78.rotation.y = this.earth.rotation.y + 0.001
-        })
-
+        runScene.cb.render.add("render", () => {
+          if (!this.earth || !this.m78) return;
+          this.earth.rotation.y = this.earth.rotation.y + 0.001;
+          this.m78.rotation.y = this.earth.rotation.y + 0.001;
+        });
       }
     }
 
-
     class CameraAnimation {
-      name = 'cameraAnimation';
+      name = "cameraAnimation";
       mounted() {
         // 相机动画
-        bus.$on('anima', this.cameraFn)
+        bus.$on("anima", this.cameraFn);
       }
       // 相机动画
       cameraFn(name) {
@@ -63,82 +59,174 @@ const fn = (runScene, inputData = {}, constant = {}) => {
       }
     }
 
+    class Shader {
+      name = "shader";
+      uniform = null;
+      speed = null;
+      init = null;
+      vs = null;
+      fs = null;
+      r = null;
+      init = null;
+      mounted() {
+        // 播放shader
+        runScene.cb.render.add("shader", () => {
+          if (!this.uniform || !this.uniform.u_r) return;
+          this.uniform.u_r.value += this.speed || 0.05;
+          if (this.uniform.u_r.value >= this.r) {
+            this.uniform.u_r.value = this.init;
+          }
+        });
+      }
+      //着色器
+      scatterCircle(r, init, ring, color, speed) {
+        this.r = r;
+        this.init = init;
+        this.speed = speed;
+        this.init = init;
+        this.uniform = {
+          u_color: { value: color },
+          u_r: { value: init },
+          u_ring: {
+            value: ring,
+          },
+        };
+
+        this.vs = `
+          varying vec3 vPosition;
+          void main(){
+          vPosition=position;
+          gl_Position  = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }`;
+        this.fs = `
+              varying vec3 vPosition;
+              uniform vec3 u_color;
+              uniform float u_r;
+              uniform float u_ring;
+
+              void main(){
+              float pct=distance(vec2(vPosition.x,vPosition.y),vec2(0.0));
+              if(pct>u_r || pct<(u_r-u_ring)){
+                gl_FragColor = vec4(1.0,0.0,0.0,0);
+              }else{
+                float dis=(pct-(u_r-u_ring))/(u_r-u_ring);
+                gl_FragColor = vec4(u_color,dis);
+              }
+              }`;
+        const geometry = new Three.CircleGeometry(r, 120);
+        var material = new Three.ShaderMaterial({
+          vertexShader: this.vs,
+          fragmentShader: this.fs,
+          side: Three.DoubleSide,
+          uniforms: this.uniform,
+          transparent: true,
+          depthWrite: false,
+        });
+        const circle = new Three.Mesh(geometry, material);
+        circle.layers.set(this.currentlayers);
+        return circle;
+      }
+    }
 
     // 基本事件
     class Events {
       name = "events";
-
       clickModel = null;
-
       isRunning = true;
-
+      e = null;
+      lastCircle = null;
       constructor() {
-        runScene.cb.model.setSelect.add(
+        // setSelect
+        runScene.cb.model.click.add(
           "trigger-click",
           this.triggerClick.bind(this)
         );
 
-        this.refreshDom()
+        bus.$on("sceneRunning2", (isRunnig) => {
+          this.isRunning = isRunnig;
+        });
 
-        bus.$on('sceneRunning2', (isRunnig) => {
-          this.isRunning = isRunnig
-        })
+        document.addEventListener("click", function (e) {
+          this.e = e;
+        });
       }
 
       triggerClick = (model) => {
-
         if (!model) return;
 
         // 打印bus
-        bus.$emit("logClickModel", model);
+        // bus.$emit("logClickModel", model);
 
-        // 点击事件
-        this.clickSprite(model)
+        document.addEventListener("click", (event) => {
+          // 点击事件
+          this.clickSprite(model, event);
+        });
+
+        document.removeEventListener("click", function (event) { });
       };
 
       // 点击事件
-      clickSprite(model) {
+      clickSprite(model, e) {
+        // 清除上个shader
+        this.lastCircle ? scene.remove(this.lastCircle) : ''
+        const dom = document.querySelector(".scene2");
+        // 2d转3d维度
+        const get3DVecInfo = {
+          x: e.clientX,
+          y: e.clientY,
+          domContainer: dom,
+          camera,
+          targetZ: 5,
+        };
 
-        // 点击车位看板
-        if (model.name.includes('工程项目')) {
+        this.lastCircle = core.shader.scatterCircle(
+          1,
+          0.1,
+          0.3,
+          new Three.Vector3(0, 1, 1),
+          0.05
+        );
 
-          const ps = this.getXy(model);
+        const pos = this.get3DVec(get3DVecInfo);
 
-          bus.$emit("set-state-dialogThree", true)
+        this.lastCircle.position.set(pos.x, 0, pos.z);
 
-          bus.$emit("set-position-dialogThree", '', ps);
+        this.lastCircle.rotation.x = Math.PI / 2;
 
-          this.clickModel = model;
+        // console.log(e.clientX, e.clientY, pos, model, "this.lastCircle:", this.lastCircle);
 
-        } else {
-
-          // 清空点击的模型
-          this.clickModel = null;
-
-          bus.$emit("set-state-dialogThree", false)
-
-        }
+        scene.add(this.lastCircle);
       }
+      /**
+       *
+       * @param {Number} x 屏幕坐标 x
+       * @param {Number} y 屏幕坐标 y
+       * @param {Document} domContainer 存放元素的容积
+       * @param {THREE.PerspectiveCamera} camera 相机
+       * @param {Number} targetZ  z轴 默认为0
+       */
 
-      // 刷新dom
-      refreshDom() {
+      // 2位坐标转 3d坐标
+      get3DVec({ x, y, domContainer, camera, targetZ }) {
 
-        runScene.cb.controls.change.add("setDialogPosition", () => {
+        const mouse = new Three.Vector2();
+        mouse.x = (x / window.innerWidth) * 2 - 1;
+        mouse.y = - (y / window.innerHeight) * 2 + 1;
+        // 创建一个射线
+        const raycaster = new Three.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
 
-          if (!this.clickModel) return
+        // 计算射线与场景中的物体相交情况
+        const intersects = raycaster.intersectObjects(scene.children);
 
-          // if (!this.isRunning) return
+        let position = null
+        // 如果有物体与射线相交，则获取第一个相交物体的位置
+        if (intersects.length > 0) {
+          const intersection = intersects[0];
+          position = intersection.point;
+        }
 
-          const map = { outDom: document.querySelector('#app'), model: this.clickModel, camera }
-
-          const { left: x, top: y } = this.get2DVec(map);
-
-          const ps = { x, y };
-
-          // console.log('x:', x, y);
-
-          bus.$emit("set-position-dialogThree", '', ps);
-        });
+        return position;
       }
 
       // 3d坐标转2位坐标
@@ -170,14 +258,13 @@ const fn = (runScene, inputData = {}, constant = {}) => {
       }
 
       getXy(model) {
-
-        const map = { outDom: document.querySelector('#app'), model, camera }
+        const map = { outDom: document.querySelector("#app"), model, camera };
 
         const { left: x, top: y } = this.get2DVec(map);
 
         const ps = { x, y };
 
-        return ps
+        return ps;
       }
 
       dispose() {
@@ -185,7 +272,7 @@ const fn = (runScene, inputData = {}, constant = {}) => {
       }
     }
 
-    return [Events, InitScene, CameraAnimation];
+    return [Events, InitScene, CameraAnimation, Shader];
   };
 
   const modules = fn({

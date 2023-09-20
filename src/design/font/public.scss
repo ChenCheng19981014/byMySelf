@@ -1,0 +1,31 @@
+//全局公共样式
+
+@font-face {
+  font-family:"SourceHanSansCN";
+  src: url("./SourceHanSansCN-Medium.otf");
+}
+
+@font-face {
+  font-family: "number";
+  src: url("./D-DIN.otf");
+}
+
+@font-face{
+  font-family: "pm";
+  src:url("./庞门正道标题体2.0增强版.ttf");
+}
+
+@font-face{
+  font-family: "small";
+  src: url('./SourceHanSansCN-Regular.otf');
+}
+
+.fs{
+  font-family: "small";
+}
+
+
+*{
+  font-family: "SourceHanSansCN";
+  color: white;
+}
