@@ -31,6 +31,8 @@ const fn = (runScene, inputData = {}, constant = {}) => {
         Utils.getMacro(() => this.getModel(), 1000);
         // 地球转动
         this.earthRotation();
+
+        controls.screenSpacePanning = false;
       }
 
       getModel() {

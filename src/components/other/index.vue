@@ -1,7 +1,6 @@
 <template>
   <div class="byMySelf">
-    <div class="title">Welcome To myWorld</div>
-
+    <div class="title">Welcome To myWebGLWorld (little-demo*)</div>
     <div class="btn-type">
       <button
         class="btn"
@@ -22,7 +21,7 @@ export default {
   components: {},
   data() {
     return {
-      sceneList: ["scene1", "scene2"],
+      sceneList: ["场景1", "场景2", "场景3"],
     };
   },
   mounted() {},

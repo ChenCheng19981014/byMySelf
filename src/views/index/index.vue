@@ -14,6 +14,11 @@
     height: 100%;
     position: absolute;
   }
+  .scene3 {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 }
 </style>
 
@@ -22,16 +27,17 @@ import { ref, reactive, shallowRef, DefineComponent } from "vue";
 import bus from "./../../utils/Bus";
 import scene1 from "../../components/three/scene1/index.vue";
 import scene2 from "../../components/three/scene2/index.vue";
+import scene3 from "../../components/three/scene3/index.vue";
 import byMySelf from "../../components/other/index.vue";
 let showScene = ref(byMySelf);
 // 切场景
 const changeScene = (name) => {
-  if (name === "scene1") {
+  if (name === "场景1") {
     showScene.value = scene1 as any | DefineComponent;
-  } else if (name === "scene2") {
+  } else if (name === "场景2") {
     showScene.value = scene2 as any | DefineComponent;
-  } else if (name === "scene3") {
-    // showScene.value = scene3;
+  } else if (name === "场景3") {
+    showScene.value = scene3 as any | DefineComponent;
   }
 };
 // bus-切场景

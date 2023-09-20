@@ -82,6 +82,11 @@ export default {
 
     onDone() {
       this.loadingEnd = true;
+      // 入场动画
+      let timer = setTimeout(() => {
+        scene.cameraEx.setTemp("初始", { time: 2 });
+        clearTimeout(timer);
+      }, 1000);
       console.log("场景加载完毕~");
     },
   },
