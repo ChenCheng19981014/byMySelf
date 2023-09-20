@@ -18,7 +18,7 @@ import * as THREE from "three";
 import { fn } from "./Change";
 import { RunScene, Utils } from "run-scene-v2";
 import bus from "@/utils/bus";
-import Load from "./components/load/index.vue";
+import Load from "../components/load/index.vue";
 export default {
   name: "scene2",
   components: {
