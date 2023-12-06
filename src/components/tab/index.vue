@@ -45,6 +45,7 @@ export default {
   display: flex;
   align-items: center;
   flex-direction: column;
+  position: fixed;
 
   .title {
     margin-top: 100px;
